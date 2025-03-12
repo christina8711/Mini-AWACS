@@ -1,6 +1,21 @@
+require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const app = express();
 const port = 3000;
+
+// Import Twilio SDK
+const twilio = require('twilio');
+
+// Get Twilio credentials from environment variables
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+// Get recipient phone numbers from environment variables
+const recipientPhoneNumbers = process.env.RECIPIENT_PHONE_NUMBERS.split(',');
+
+// Initialize Twilio client
+const client = twilio(accountSid, authToken);
 
 // Function to generate random radar data
 function generateRandomRadarData() {
@@ -25,7 +40,28 @@ function generateRandomRadarData() {
 app.get('/radar-data', (req, res) => {
     const radarData = generateRandomRadarData();
     res.json(radarData);
+
+    // Send radar data as an SMS
+    sendSMS(radarData);
 });
+
+// Function to send SMS using Twilio
+function sendSMS(data) {
+    // Format the radar data as a string
+    const messageBody = JSON.stringify(data, null, 2);
+
+    // Send SMS to each phone number
+    recipientPhoneNumbers.forEach(phoneNumber => {
+        client.messages
+            .create({
+                body: `Radar Data:\n${messageBody}`,
+                from: twilioPhoneNumber,
+                to: phoneNumber
+            })
+            .then(message => console.log(`SMS sent to ${phoneNumber}. Message SID: ${message.sid}`))
+            .catch(error => console.error(`Error sending SMS to ${phoneNumber}:`, error));
+    });
+}
 
 // Serve static files from the "public" directory
 app.use(express.static('public'));
