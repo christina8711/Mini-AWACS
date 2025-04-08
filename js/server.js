@@ -42,7 +42,7 @@ app.get('/radar-data', (req, res) => {
     res.json(radarData);
 
     // Send radar data as an SMS
-    sendSMS(radarData);
+    // sendSMS(radarData);
 });
 
 // Function to send SMS using Twilio
