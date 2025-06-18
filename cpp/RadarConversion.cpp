@@ -3,6 +3,10 @@
 
 #include <iostream>
 #include <cmath>
+#include <sstream>
+#include <iomanip>
+#include <cstdlib>
+#include <ctime>
 
 // WGS84 constants
 const double a = 6378137.0;              // Semi-major axis
@@ -68,48 +72,58 @@ void ecefToGeodetic(double x, double y, double z,
 }
 
 int main() {
-    // Example radar position (random)
-    double radarLat = 40.0;    // degrees
-    double radarLon = -75.0;   // degrees
-    double radarAlt = 100.0;    // meters
+    std::srand(std::time(nullptr));
 
-    // Example radar detection (random)
-    double range = 10000.0;      // meters
-    double azimuth = 45.0;       // degrees
-    double elevation = 10.0;      // degrees
-    double rangeRate = -100;    // m/s - radial velocity of target
+    // Radar position
+    double radarLat = 28.5;
+    double radarLon = -81.2;
+    double radarAlt = 50.0;
 
     // Convert radar position to ECEF
     double x0, y0, z0;
     geodeticToECEF(radarLat, radarLon, radarAlt, x0, y0, z0);
 
-    // Convert detection to ENU
-    double xEast, yNorth, zUp;
-    radarToENU(range, azimuth, elevation, xEast, yNorth, zUp);
+    // Random number of pings
+    int numPings = 1 + std::rand() % 10;
 
-    // Convert ENU to ECEF offset
-    double dx, dy, dz;
-    enuToECEFOffset(xEast, yNorth, zUp, radarLat, radarLon, dx, dy, dz);
+    std::ostringstream payload;
+    payload << std::fixed << std::setprecision(6);
 
-    // Compute target ECEF
-    double x = x0 + dx;
-    double y = y0 + dy;
-    double z = z0 + dz;
+    for (int i = 0; i < numPings; ++i) {
+        // Generate random radar detection values
+        double range = 5000.0 + static_cast<double>(std::rand() % 15000);       // 5km - 20km
+        double azimuth = static_cast<double>(std::rand() % 360);               // 0 - 360 deg
+        double elevation = static_cast<double>((std::rand() % 2000) / 100.0);  // 0 - 20 deg
+        double rangeRate = -100.0 + static_cast<double>(std::rand() % 200);    // -100 to +100 m/s
 
-    // Convert target ECEF to Geodetic
-    double tgtLat, tgtLon, tgtAlt;
-    ecefToGeodetic(x, y, z, tgtLat, tgtLon, tgtAlt);
+        // Convert detection to ENU
+        double xEast, yNorth, zUp;
+        radarToENU(range, azimuth, elevation, xEast, yNorth, zUp);
 
-    // Compute velocity in ENU frame (radial direction only)
-    double vxEast, vyNorth, vzUp;
-    radarToENU(rangeRate, azimuth, elevation, vxEast, vyNorth, vzUp);
+        // Convert ENU to ECEF offset
+        double dx, dy, dz;
+        enuToECEFOffset(xEast, yNorth, zUp, radarLat, radarLon, dx, dy, dz);
 
-    // Output
-    std::cout << "Target Position (Lat, Lon, Alt):\n";
-    std::cout << tgtLat << ", " << tgtLon << ", " << tgtAlt << " meters" << std::endl;
+        // Compute target ECEF
+        double x = x0 + dx;
+        double y = y0 + dy;
+        double z = z0 + dz;
 
-    std::cout << "Target Velocity (ENU):\n";
-    std::cout << "East: " << vxEast << " m/s, North: " << vyNorth << " m/s, Up: " << vzUp << " m/s" << std::endl;
+        // Convert target ECEF to Geodetic
+        double tgtLat, tgtLon, tgtAlt;
+        ecefToGeodetic(x, y, z, tgtLat, tgtLon, tgtAlt);
+
+        // Compute velocity in ENU frame (radial direction only)
+        double vxEast, vyNorth, vzUp;
+        radarToENU(rangeRate, azimuth, elevation, vxEast, vyNorth, vzUp);
+
+        // Append to payload
+        payload << "{lat:" << tgtLat << ",lon:" << tgtLon << ",alt:" << tgtAlt
+            << ",ve:" << vxEast << ",vn:" << vyNorth << ",vu:" << vzUp << "}";
+        if (i < numPings - 1) payload << ",";
+    }
+
+    std::cout << "\nRadar Ping Payload: [" << payload.str() << "]\n";
 
     return 0;
 }
