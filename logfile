@@ -1,0 +1,2 @@
+2025-07-07 19:00:58.605 EDT [8746] LOG:  redirecting log output to logging collector process
+2025-07-07 19:00:58.605 EDT [8746] HINT:  Future log output will appear in directory "log".
