@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "node src/app/auth/prisma/seed.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -15,11 +16,15 @@
     "flowbite": "^3.1.2",
     "framer-motion": "^12.6.3",
     "motion": "^12.6.3",
-    "next": "15.2.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
     "tailwind-merge": "^3.2.0",
-    "twilio": "^5.5.2"
+    "twilio": "^5.5.2",
+    "@prisma/client": "latest",
+    "bcryptjs": "latest",
+    "cookie": "latest",
+    "jsonwebtoken": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -28,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "postcss": "^8.5.3",
+    "prisma": "latest",
     "tailwindcss": "^4.1.3"
   }
 }
