@@ -1,7 +1,9 @@
 export function attachLoginHandler() {
   const form = document.getElementById("loginForm");
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASS;
+
+  // 🔑 Hard-coded login credentials
+  const adminEmail = "admin@gmail.com";
+  const adminPass = "miniawacs2025";
 
   if (!form) return;
 
