@@ -1,12 +1,41 @@
 "use client";
 
-import { useEffect } from "react";
-import { attachLoginHandler } from "@/components/login";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  useEffect(() => {
-    attachLoginHandler();
-  }, []);
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    console.log("🚀 Attempting login with:", { email, password });
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      console.log("🔍 Server response status:", res.status);
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("✅ Login success, response data:", data);
+        router.push("/dashboard");
+      } else {
+        const error = await res.json();
+        console.error("❌ Login failed, error response:", error);
+        alert(`❌ ${error.message || "Login failed"}`);
+      }
+    } catch (err) {
+      console.error("⚠️ Network error during login:", err);
+      alert("❌ An error occurred. Please try again.");
+    }
+  };
 
   return (
     <>
@@ -38,17 +67,16 @@ export default function LoginPage() {
               Login
             </h1>
 
-            <form className="space-y-6" id="loginForm">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
-                <label
-                  htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-white"
-                >
+                <label htmlFor="email" className="block mb-2 text-sm font-medium text-white">
                   Your email
                 </label>
                 <input
                   type="email"
                   id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5 placeholder-gray-400 focus:ring focus:ring-yellow-300 focus:border-yellow-400"
                   placeholder="name@military.net"
                   required
@@ -56,15 +84,14 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="password"
-                  className="block mb-2 text-sm font-medium text-white"
-                >
+                <label htmlFor="password" className="block mb-2 text-sm font-medium text-white">
                   Your password
                 </label>
                 <input
                   type="password"
                   id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full p-2.5 placeholder-gray-400 focus:ring focus:ring-yellow-300 focus:border-yellow-400"
                   required
@@ -78,10 +105,7 @@ export default function LoginPage() {
                     type="checkbox"
                     className="w-4 h-4 bg-gray-700 border-gray-600 rounded focus:ring-yellow-400"
                   />
-                  <label
-                    htmlFor="remember"
-                    className="ml-2 text-sm font-medium text-gray-300"
-                  >
+                  <label htmlFor="remember" className="ml-2 text-sm font-medium text-gray-300">
                     Remember me
                   </label>
                 </div>
@@ -94,13 +118,12 @@ export default function LoginPage() {
                 </a>
               </div>
 
-                <button
-                  type="submit"
-                  className="w-full text-black bg-[#F2B442] hover:bg-yellow-400 font-bold rounded-lg text-sm px-5 py-2.5 text-center transition-colors duration-300"
-                >
-                  Log In
-                </button>
-
+              <button
+                type="submit"
+                className="w-full text-black bg-[#F2B442] hover:bg-yellow-400 font-bold rounded-lg text-sm px-5 py-2.5 text-center transition-colors duration-300"
+              >
+                Log In
+              </button>
 
               <p className="text-sm font-light text-gray-400 text-center">
                 Don’t have an account?{" "}
