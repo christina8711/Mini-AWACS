@@ -7,20 +7,26 @@ export default function LiveRadarPage() {
   const [objects, setObjects] = useState([]);
   const [lastUpdated, setLastUpdated] = useState("Connecting to radar system...");
   const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchRadarData = async () => {
     try {
-      const res = await fetch("/api/radar?lat=28.5&lon=-81.2&alt=10000");
+      const res = await fetch("http://44.193.2.36:3001/api/radar");
+      if (!res.ok) throw new Error("Server not responding");
+
       const data = await res.json();
-      if (!Array.isArray(data.radarPoints)) throw new Error("Invalid data format");
+      if (!Array.isArray(data.radarPoints)) throw new Error("Invalid radar format");
+
       setObjects(data.radarPoints);
-      setLastUpdated(`Last updated: ${new Date().toLocaleTimeString()}`);
-      setError(false);
+      setLastUpdated(`✅ Last updated: ${new Date().toLocaleTimeString()}`);
+      setError(data.radarPoints.length === 0);
     } catch (err) {
-      console.error("Radar data fetch failed", err);
+      console.error("Radar data fetch failed:", err);
       setObjects([]);
-      setLastUpdated("❌ Radar data fetch failed");
+      setLastUpdated("❌ No radar data currently available");
       setError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,19 +41,21 @@ export default function LiveRadarPage() {
       <h1 className="text-2xl mb-4">Live Radar Feed (Plain Text)</h1>
 
       <div className="bg-[#121215] p-6 rounded-xl shadow-lg max-w-3xl w-full mx-auto pointer-events-auto">
-        {objects.length > 0 ? (
+        {isLoading ? (
+          <p className="text-gray-400">⏳ Connecting to radar stream...</p>
+        ) : objects.length > 0 ? (
           <div className="space-y-4">
             {objects.map((obj, idx) => (
               <div key={idx} className="bg-black border border-green-800 p-4 rounded text-sm">
                 <div>Type: {obj.type || "drone"}</div>
                 <div>Azimuth: {obj.azimuth?.toFixed(2)}°</div>
                 <div>Range: {obj.range?.toFixed(2)} NM</div>
-                <div>Altitude: {obj.alt ? `${Math.round(obj.alt)} m` : "100 m"}</div>
+                <div>Altitude: {obj.alt ? `${Math.round(obj.alt)} m` : "—"}</div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-400">No radar data available.</p>
+          <p className="text-gray-400">🚫 No radar data currently available.</p>
         )}
       </div>
 

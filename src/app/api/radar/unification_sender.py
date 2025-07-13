@@ -6,7 +6,7 @@ RADAR_IP = "236.6.7.8"  # Multicast group
 RADAR_PORT = 6678
 
 # ✅ NEW SERVER IP & PORT
-SERVER_IP = "34.200.230.158"
+SERVER_IP = "44.193.2.36"
 SERVER_PORT = 5005
 
 DISPLAY_EVERY_N_PACKETS = 100  # Limit console output frequency
