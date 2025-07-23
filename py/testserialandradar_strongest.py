@@ -18,6 +18,7 @@ DISPLAY_EVERY_N_PACKETS = 100
 
 elevation_data = {"step": None, "angle": None}
 stop_flag = False
+ser = None
 
 def step_to_angle(step, max_steps):
     step = max(0, min(step, max_steps))
@@ -111,7 +112,7 @@ def parse_radar_packet(data):
     }
 
 def serial_reader():
-    global stop_flag, elevation_data
+    global stop_flag, elevation_data, ser
     max_observed_step = MAX_SERIAL_STEPS
 
     try:
@@ -136,11 +137,13 @@ def serial_reader():
         print(f"[Serial Error] {e}")
 
 def input_listener():
-    global stop_flag
+    global stop_flag, ser
     while not stop_flag:
         cmd = input("Type '0' to stop: ").strip()
+        #ser.write(b'0\n')
         if cmd == '0':
             stop_flag = True
+            ser.write(b'0\n')
             print("Stopping...")
 
 def start_combined_listener():
